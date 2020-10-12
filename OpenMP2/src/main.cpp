@@ -5,6 +5,7 @@
 
 double calc(uint32_t x_last, uint32_t num_threads)
 {
+  //for
   return 0;
 }
 
