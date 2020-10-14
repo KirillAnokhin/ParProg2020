@@ -18,6 +18,7 @@ double calc(uint32_t x_last, uint32_t num_threads)
   for (uint32_t i = 0; i < x_last; i++) {
     sum += items[x_last - 1 - i];
   }
+  free(items);
   return sum;
 }
 
