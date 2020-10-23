@@ -9,9 +9,35 @@ double func(double x)
   return sin(x);
 }
 
+double kahan_sum(double *vals, int n) 
+{
+  double sum = 0.0;
+  double c = 0.0;
+  double t, y;
+
+  for (int i = 0; i < n; i++) {
+    y = vals[i] - c;
+    t = sum + y;
+    c = (t - sum) - y;
+    sum = t;
+  }
+
+  return sum;
+}
+
 double calc(double x0, double x1, double dx, uint32_t num_threads)
 {
-  return 0;
+  int n = (x1 - x0) / dx;
+  double *vals = (double*)calloc(n, sizeof(double));
+  #pragma omp parallel for num_threads(num_threads)
+    for (int i = 0; i < n; i++) {
+      vals[i] = (func(x0 + (i+1)*dx) + func(x0 + i*dx))/2;
+    }
+
+  double sum = kahan_sum(vals, n) * dx;
+
+  free(vals);
+  return sum;
 }
 
 int main(int argc, char** argv)
