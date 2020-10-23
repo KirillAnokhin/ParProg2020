@@ -2,10 +2,59 @@
 #include <iomanip>
 #include <fstream>
 #include <omp.h>
+#include <assert.h>
+#include <algorithm>
+#include <vector>
+
+using namespace std;
+
+template <typename T>
+T div_up(T &&a, T &&b) {
+  return (a+b-1)/b;
+}
+
+template <typename T>
+T min(T &&a, T &&b)
+{
+    return (b < a) ? b : a;
+}
+
+
+struct Values {
+  double sum;
+  double term;
+};
+
+Values calculate(int beg, int end) {
+  double term = 1, sum = 0;
+  for (int i = beg; i < end; i++) {
+    term /= i;
+    sum += term;
+  }
+  struct Values s;
+  s.sum = sum;
+  s.term = term;
+  return s;
+}
 
 double calc(uint32_t x_last, uint32_t num_threads)
 {
-  return 0;
+  int n_task = div_up((int) x_last-1, (int) num_threads);
+  vector<Values> res(num_threads);
+  #pragma omp parallel num_threads(num_threads) firstprivate(n_task)
+  {
+    int id = omp_get_thread_num();
+    int beg = id * n_task + 1;
+    int end = min(beg+n_task, (int) x_last);
+    res[id] = calculate(beg, end);
+  }
+  double mp = 1;
+  double sum = 1;
+  for (int i = 0; i < (int) num_threads; i++) {
+    sum += mp * res[i].sum;
+    mp *= res[i].term;
+  }
+  return sum;
 }
 
 int main(int argc, char** argv)

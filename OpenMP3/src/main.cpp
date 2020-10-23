@@ -31,10 +31,10 @@ double calc(double x0, double x1, double dx, uint32_t num_threads)
   double *vals = (double*)calloc(n, sizeof(double));
   #pragma omp parallel for num_threads(num_threads)
     for (int i = 0; i < n; i++) {
-      vals[i] = (func(x0 + (i+1)*dx) + func(x0 + i*dx))*dx/2;
+      vals[i] = (func(x0 + (i+1)*dx) + func(x0 + i*dx))/2;
     }
 
-  double sum = kahan_sum(vals, n);
+  double sum = kahan_sum(vals, n) * dx;
 
   free(vals);
   return sum;
